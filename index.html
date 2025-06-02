@@ -18,22 +18,41 @@
             --btn-hover: #34843f;
             --breadcrumb-bg: #252525;
             --file-size-color: #999;
+            --nav-bg: #252525;
+            --nav-active: #3a3a3a;
         }
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             line-height: 1.6;
             background-color: var(--bg-color);
             color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--nav-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         h1 {
             color: var(--header-color);
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
+            margin-top: 0;
         }
 
         .file-list {
@@ -43,7 +62,7 @@
 
         .folder {
             margin: 10px 0;
-            padding-left: 20px;
+            padding-left: 15px;
         }
 
         .folder-name {
@@ -55,61 +74,80 @@
             display: flex;
             align-items: center;
             transition: color 0.2s;
+            padding: 5px;
+            border-radius: 4px;
         }
 
         .folder-name:hover {
             color: var(--folder-hover);
+            background-color: var(--nav-active);
         }
 
-        .folder-name::before {
-            content: '📁 ';
-            margin-right: 5px;
-        }
-
-        .folder-name.open::before {
-            content: '📂 ';
+        .folder-icon {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
         }
 
         .folder-contents {
             display: none;
-            margin-left: 15px;
+            margin-left: 10px;
         }
 
         .folder-contents.open {
             display: block;
         }
 
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
         .file-item {
-            margin: 8px 0;
-            padding: 10px;
             background-color: var(--file-bg);
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: transform 0.1s;
+            border-radius: 6px;
+            overflow: hidden;
             border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .file-item:hover {
-            transform: translateX(3px);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .file-link {
-            color: var(--link-color);
-            text-decoration: none;
-            flex-grow: 1;
+        .file-icon {
+            height: 120px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            background-color: rgba(0, 0, 0, 0.2);
         }
 
-        .file-link::before {
-            content: '📄 ';
-            margin-right: 5px;
+        .file-details {
+            padding: 10px;
         }
 
-        .file-link:hover {
-            text-decoration: underline;
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .file-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--file-size-color);
+        }
+
+        .file-actions {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid var(--border-color);
         }
 
         .download-btn {
@@ -121,134 +159,382 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            text-align: center;
         }
 
         .download-btn:hover {
             background-color: var(--btn-hover);
         }
 
-        .file-size {
-            color: var(--file-size-color);
-            margin-right: 15px;
-            font-size: 14px;
-        }
-
         .breadcrumb {
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 10px 15px;
             background-color: var(--breadcrumb-bg);
             border-radius: 4px;
             border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item {
+            color: var(--link-color);
+            cursor: pointer;
+        }
+
+        .breadcrumb-item:not(:last-child)::after {
+            content: '/';
+            margin: 0 8px;
+            color: var(--text-color);
+        }
+
+        .breadcrumb-item:last-child {
+            color: var(--text-color);
+            cursor: default;
+        }
+
+        .empty-folder-message {
+            text-align: center;
+            color: var(--file-size-color);
+            margin-top: 30px;
+            font-style: italic;
+        }
+
+        .file-type-exe .file-icon::before {
+            content: '⚙️';
+        }
+
+        .file-type-json .file-icon::before {
+            content: '📄';
+        }
+
+        .file-type-default .file-icon::before {
+            content: '📄';
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
         }
     </style>
 </head>
 <body>
-    <h1>BasicTriangleRenderer Mod File Download Server</h1>
-    <div id="breadcrumb" class="breadcrumb">Home</div>
-    <div id="file-container"></div>
+    <div class="sidebar">
+        <div id="folder-tree"></div>
+    </div>
+    <div class="main-content">
+        <h1>BasicTriangleRenderer Downloads</h1>
+        <div id="breadcrumb" class="breadcrumb"></div>
+        <div id="file-container"></div>
+    </div>
 
     <script>
         // This is the configuration for your files
-        // For GitHub Pages, you'll need to manually list your files here
         const fileStructure = {
             "files": {
                 "Builds": {
                     "Windows": {
                         "game.exe": {
-                            size: "Unknown", // File size in a readable format
-                            type: "application/octet-stream"
+                            size: "42.7 MB",
+                            type: "exe",
+                            lastModified: "2025-05-15"
                         },
-                        "version.json": {
-                            size: "Unknown",
-                            type: "application/json"
+                        "serverVersion.json": {
+                            size: "1.2 KB",
+                            type: "json",
+                            lastModified: "2025-05-15"
                         }
                     }
                 }
             }
         };
 
-        // Helper function to check if an object is a file (has size property)
+        // Current path the user is viewing
+        let currentPath = [];
+
+        // Helper function to check if an object is a file
         function isFile(obj) {
             return obj && obj.hasOwnProperty('size');
         }
 
-        // Function to render a folder and its contents
-        function renderFolder(name, contents, path = "") {
-            const folderDiv = document.createElement('div');
-            folderDiv.className = 'folder';
-
-            const folderNameEl = document.createElement('div');
-            folderNameEl.className = 'folder-name';
-            folderNameEl.textContent = name;
-            folderDiv.appendChild(folderNameEl);
-
-            const folderContentsEl = document.createElement('div');
-            folderContentsEl.className = 'folder-contents';
-            folderDiv.appendChild(folderContentsEl);
-
-            // Add click event to toggle folder contents
-            folderNameEl.addEventListener('click', () => {
-                folderNameEl.classList.toggle('open');
-                folderContentsEl.classList.toggle('open');
-            });
-
-            // Current path including this folder
-            const currentPath = path ? `${path}/${name}` : name;
-
-            // Process folder contents
-            for (const itemName in contents) {
-                const item = contents[itemName];
-
-                if (isFile(item)) {
-                    // This is a file
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
-
-                    const fileLink = document.createElement('a');
-                    fileLink.className = 'file-link';
-                    fileLink.href = `${currentPath}/${itemName}`;
-                    fileLink.textContent = itemName;
-                    fileItem.appendChild(fileLink);
-
-                    if (item.size) {
-                        const fileSize = document.createElement('span');
-                        fileSize.className = 'file-size';
-                        fileSize.textContent = item.size;
-                        fileItem.appendChild(fileSize);
-                    }
-
-                    const downloadBtn = document.createElement('a');
-                    downloadBtn.className = 'download-btn';
-                    downloadBtn.href = `${currentPath}/${itemName}`;
-                    downloadBtn.textContent = 'Download';
-                    downloadBtn.setAttribute('download', '');
-                    fileItem.appendChild(downloadBtn);
-
-                    folderContentsEl.appendChild(fileItem);
+        // Helper function to get object at path
+        function getObjectAtPath(path) {
+            let current = fileStructure;
+            for (const segment of path) {
+                if (current[segment]) {
+                    current = current[segment];
                 } else {
-                    // This is a subfolder
-                    const subfolderEl = renderFolder(itemName, item, currentPath);
-                    folderContentsEl.appendChild(subfolderEl);
+                    return null;
                 }
             }
-
-            return folderDiv;
+            return current;
         }
 
-        function displayFiles() {
+        // Render the folder tree in sidebar
+        function renderFolderTree() {
+            const treeContainer = document.getElementById('folder-tree');
+            treeContainer.innerHTML = '';
+
+            function buildTreeItem(name, obj, path = []) {
+                const folder = document.createElement('div');
+                folder.className = 'folder';
+
+                const folderName = document.createElement('div');
+                folderName.className = 'folder-name';
+
+                const icon = document.createElement('span');
+                icon.className = 'folder-icon';
+                icon.textContent = '📁';
+                folderName.appendChild(icon);
+
+                folderName.appendChild(document.createTextNode(name));
+                folder.appendChild(folderName);
+
+                const currentItemPath = [...path, name];
+
+                // Add click event to navigate
+                folderName.addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    // Toggle subfolders in the tree
+                    const contents = folder.querySelector('.folder-contents');
+                    if (contents) {
+                        icon.textContent = contents.classList.contains('open') ? '📁' : '📂';
+                        contents.classList.toggle('open');
+                    }
+
+                    // Navigate to this folder
+                    navigateTo(currentItemPath);
+                });
+
+                // Only create subfolders for objects that aren't files
+                if (!isFile(obj)) {
+                    const folderContents = document.createElement('div');
+                    folderContents.className = 'folder-contents';
+
+                    for (const itemName in obj) {
+                        const item = obj[itemName];
+                        if (!isFile(item)) {
+                            const subItem = buildTreeItem(itemName, item, currentItemPath);
+                            folderContents.appendChild(subItem);
+                        }
+                    }
+
+                    if (folderContents.children.length > 0) {
+                        folder.appendChild(folderContents);
+                    }
+                }
+
+                return folder;
+            }
+
+            // Build the tree for each root folder
+            for (const rootName in fileStructure) {
+                const rootItem = buildTreeItem(rootName, fileStructure[rootName]);
+                treeContainer.appendChild(rootItem);
+            }
+        }
+
+        // Render the breadcrumb navigation
+        function renderBreadcrumb() {
+            const breadcrumbContainer = document.getElementById('breadcrumb');
+            breadcrumbContainer.innerHTML = '';
+
+            // Add home item
+            const homeItem = document.createElement('span');
+            homeItem.className = 'breadcrumb-item';
+            homeItem.textContent = 'Home';
+            homeItem.addEventListener('click', () => navigateTo([]));
+            breadcrumbContainer.appendChild(homeItem);
+
+            // Add each path segment
+            let currentSegmentPath = [];
+            for (let i = 0; i < currentPath.length; i++) {
+                currentSegmentPath = [...currentSegmentPath, currentPath[i]];
+
+                const segmentItem = document.createElement('span');
+                segmentItem.className = 'breadcrumb-item';
+                segmentItem.textContent = currentPath[i];
+
+                // Don't make the last item clickable as we're already there
+                if (i < currentPath.length - 1) {
+                    const pathCopy = [...currentSegmentPath]; // Create a copy to avoid reference issues
+                    segmentItem.addEventListener('click', () => navigateTo(pathCopy));
+                }
+
+                breadcrumbContainer.appendChild(segmentItem);
+            }
+        }
+
+        // Navigate to a specific path
+        function navigateTo(path) {
+            currentPath = path;
+            renderContent();
+            renderBreadcrumb();
+
+            // Highlight the active folder in the sidebar
+            const allFolderNames = document.querySelectorAll('.folder-name');
+            allFolderNames.forEach(el => el.style.backgroundColor = '');
+
+            if (path.length > 0) {
+                // Try to find and highlight the current folder in the sidebar
+                // This is a simple approach; a more robust one might be needed for deeper paths
+                let pathToMatch = path.join('/');
+                const folders = document.querySelectorAll('.folder-name');
+
+                folders.forEach(folder => {
+                    if (folder.textContent.includes(path[path.length - 1])) {
+                        folder.style.backgroundColor = 'var(--nav-active)';
+                    }
+                });
+            }
+        }
+
+        // Render the files and folders in the current path
+        function renderContent() {
             const container = document.getElementById('file-container');
             container.innerHTML = '';
 
-            // Create the root folders
-            for (const rootFolderName in fileStructure) {
-                const rootFolder = fileStructure[rootFolderName];
-                const folderEl = renderFolder(rootFolderName, rootFolder);
-                container.appendChild(folderEl);
+            // Get the current directory object
+            let currentDir = getObjectAtPath(currentPath);
+
+            if (!currentDir) {
+                container.innerHTML = '<div class="empty-folder-message">This folder does not exist.</div>';
+                return;
+            }
+
+            const fileGrid = document.createElement('div');
+            fileGrid.className = 'file-grid';
+
+            let hasItems = false;
+
+            // Create folder items
+            for (const itemName in currentDir) {
+                const item = currentDir[itemName];
+
+                if (!isFile(item)) {
+                    // This is a folder
+                    hasItems = true;
+
+                    const folderItem = document.createElement('div');
+                    folderItem.className = 'file-item';
+
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = 'file-icon';
+                    fileIcon.textContent = '📁';
+                    folderItem.appendChild(fileIcon);
+
+                    const fileDetails = document.createElement('div');
+                    fileDetails.className = 'file-details';
+
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = itemName;
+                    fileDetails.appendChild(fileName);
+
+                    folderItem.appendChild(fileDetails);
+
+                    // Make the folder item clickable
+                    folderItem.addEventListener('click', () => {
+                        navigateTo([...currentPath, itemName]);
+                    });
+
+                    fileGrid.appendChild(folderItem);
+                }
+            }
+
+            // Create file items
+            for (const itemName in currentDir) {
+                const item = currentDir[itemName];
+
+                if (isFile(item)) {
+                    // This is a file
+                    hasItems = true;
+
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    const fileIcon = document.createElement('div');
+                    fileIcon.className = `file-icon file-type-${item.type || 'default'}`;
+                    fileItem.appendChild(fileIcon);
+
+                    const fileDetails = document.createElement('div');
+                    fileDetails.className = 'file-details';
+
+                    const fileName = document.createElement('div');
+                    fileName.className = 'file-name';
+                    fileName.textContent = itemName;
+                    fileDetails.appendChild(fileName);
+
+                    const fileMeta = document.createElement('div');
+                    fileMeta.className = 'file-meta';
+
+                    const fileSize = document.createElement('span');
+                    fileSize.textContent = item.size || 'Unknown size';
+                    fileMeta.appendChild(fileSize);
+
+                    if (item.lastModified) {
+                        const fileDate = document.createElement('span');
+                        fileDate.textContent = item.lastModified;
+                        fileMeta.appendChild(fileDate);
+                    }
+
+                    fileDetails.appendChild(fileMeta);
+                    fileItem.appendChild(fileDetails);
+
+                    const fileActions = document.createElement('div');
+                    fileActions.className = 'file-actions';
+
+                    // Construct file path for download
+                    let filePath = '';
+                    if (currentPath.length > 0) {
+                        filePath = currentPath.join('/') + '/';
+                    }
+                    filePath += itemName;
+
+                    const downloadBtn = document.createElement('a');
+                    downloadBtn.className = 'download-btn';
+                    downloadBtn.href = filePath;
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.setAttribute('download', '');
+                    fileActions.appendChild(downloadBtn);
+
+                    fileItem.appendChild(fileActions);
+                    fileGrid.appendChild(fileItem);
+                }
+            }
+
+            if (hasItems) {
+                container.appendChild(fileGrid);
+            } else {
+                container.innerHTML = '<div class="empty-folder-message">This folder is empty.</div>';
             }
         }
 
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', displayFiles);
+        // Initialize the file explorer
+        function initFileExplorer() {
+            renderFolderTree();
+            navigateTo([]); // Start at the root
+        }
+
+        // Initialize when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initFileExplorer);
     </script>
 </body>
 </html>
