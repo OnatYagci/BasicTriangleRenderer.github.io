@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasicTriangleRenderer.github.io</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --header-color: #f0f0f0;
+            --border-color: #444;
+            --folder-color: #bbbbbb;
+            --folder-hover: #4e9bff;
+            --file-bg: #2d2d2d;
+            --link-color: #4e9bff;
+            --btn-bg: #2a6e34;
+            --btn-hover: #34843f;
+            --breadcrumb-bg: #252525;
+            --file-size-color: #999;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        h1 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .file-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .folder {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .folder-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--folder-color);
+            margin: 5px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .folder-name:hover {
+            color: var(--folder-hover);
+        }
+
+        .folder-name::before {
+            content: '📁 ';
+            margin-right: 5px;
+        }
+
+        .folder-name.open::before {
+            content: '📂 ';
+        }
+
+        .folder-contents {
+            display: none;
+            margin-left: 15px;
+        }
+
+        .folder-contents.open {
+            display: block;
+        }
+
+        .file-item {
+            margin: 8px 0;
+            padding: 10px;
+            background-color: var(--file-bg);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.1s;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-item:hover {
+            transform: translateX(3px);
+        }
+
+        .file-link {
+            color: var(--link-color);
+            text-decoration: none;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-link::before {
+            content: '📄 ';
+            margin-right: 5px;
+        }
+
+        .file-link:hover {
+            text-decoration: underline;
+        }
+
+        .download-btn {
+            background-color: var(--btn-bg);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .download-btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .file-size {
+            color: var(--file-size-color);
+            margin-right: 15px;
+            font-size: 14px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--breadcrumb-bg);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <h1>BasicTriangleRenderer Mod File Download Server</h1>
+    <div id="breadcrumb" class="breadcrumb">Home</div>
+    <div id="file-container"></div>
+
+    <script>
+        // This is the configuration for your files
+        // For GitHub Pages, you'll need to manually list your files here
+        const fileStructure = {
+            "files": {
+                "Builds": {
+                    "Windows": {
+                        "game.exe": {
+                            size: "Unknown", // File size in a readable format
+                            type: "application/octet-stream"
+                        },
+                        "version.json": {
+                            size: "Unknown",
+                            type: "application/json"
+                        }
+                    }
+                }
+            }
+        };
+
+        // Helper function to check if an object is a file (has size property)
+        function isFile(obj) {
+            return obj && obj.hasOwnProperty('size');
+        }
+
+        // Function to render a folder and its contents
+        function renderFolder(name, contents, path = "") {
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'folder';
+
+            const folderNameEl = document.createElement('div');
+            folderNameEl.className = 'folder-name';
+            folderNameEl.textContent = name;
+            folderDiv.appendChild(folderNameEl);
+
+            const folderContentsEl = document.createElement('div');
+            folderContentsEl.className = 'folder-contents';
+            folderDiv.appendChild(folderContentsEl);
+
+            // Add click event to toggle folder contents
+            folderNameEl.addEventListener('click', () => {
+                folderNameEl.classList.toggle('open');
+                folderContentsEl.classList.toggle('open');
+            });
+
+            // Current path including this folder
+            const currentPath = path ? `${path}/${name}` : name;
+
+            // Process folder contents
+            for (const itemName in contents) {
+                const item = contents[itemName];
+
+                if (isFile(item)) {
+                    // This is a file
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    const fileLink = document.createElement('a');
+                    fileLink.className = 'file-link';
+                    fileLink.href = `${currentPath}/${itemName}`;
+                    fileLink.textContent = itemName;
+                    fileItem.appendChild(fileLink);
+
+                    if (item.size) {
+                        const fileSize = document.createElement('span');
+                        fileSize.className = 'file-size';
+                        fileSize.textContent = item.size;
+                        fileItem.appendChild(fileSize);
+                    }
+
+                    const downloadBtn = document.createElement('a');
+                    downloadBtn.className = 'download-btn';
+                    downloadBtn.href = `${currentPath}/${itemName}`;
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.setAttribute('download', '');
+                    fileItem.appendChild(downloadBtn);
+
+                    folderContentsEl.appendChild(fileItem);
+                } else {
+                    // This is a subfolder
+                    const subfolderEl = renderFolder(itemName, item, currentPath);
+                    folderContentsEl.appendChild(subfolderEl);
+                }
+            }
+
+            return folderDiv;
+        }
+
+        function displayFiles() {
+            const container = document.getElementById('file-container');
+            container.innerHTML = '';
+
+            // Create the root folders
+            for (const rootFolderName in fileStructure) {
+                const rootFolder = fileStructure[rootFolderName];
+                const folderEl = renderFolder(rootFolderName, rootFolder);
+                container.appendChild(folderEl);
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', displayFiles);
+    </script>
+</body>
+</html>
